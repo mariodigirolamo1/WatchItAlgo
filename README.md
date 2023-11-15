@@ -1,2 +1,2 @@
 # WatchItAlgo
- Visualiuze Algorithms in ComposeUI!
+ Visualize Algorithms in ComposeUI!
