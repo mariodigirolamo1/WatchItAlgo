@@ -1,6 +1,7 @@
 package com.mdg.watchitalgo
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
 import com.mdg.watchitalgo.screens.home.Home
 
 /**
