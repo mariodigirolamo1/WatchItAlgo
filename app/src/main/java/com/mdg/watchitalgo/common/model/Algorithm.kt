@@ -1,6 +1,19 @@
 package com.mdg.watchitalgo.common.model
 
-data class Algorithm(
-    val name: String,
+enum class Algorithm(
+    val route: String,
     val available: Boolean
-)
+){
+    BubbleSort(
+        route = "bubblesort",
+        available = true
+    ),
+    QuickSort(
+        route = "quicksort",
+        available = false
+    ),
+    InsertionSort(
+        route = "insertionsort",
+        available = false
+    )
+}
