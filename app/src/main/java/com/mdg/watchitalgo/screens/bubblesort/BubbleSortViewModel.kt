@@ -32,12 +32,9 @@ class BubbleSortViewModel: ViewModel() {
                 if(tmpCurrentIndex == 0 && swapped){
                     swapped = false
                 }
-                println("Current Index $tmpCurrentIndex vs Size ${tmpArray.size - 1}")
                 if(
                     tmpCurrentIndex < tmpArray.size - 1
                 ){
-                    println("current val ${tmpArray[tmpCurrentIndex]} vs next val " +
-                            "${tmpArray[tmpCurrentIndex+1]}")
                     if(tmpArray[tmpCurrentIndex] > tmpArray[tmpCurrentIndex+1]){
                         val tmp = tmpArray[tmpCurrentIndex+1]
                         tmpArray[tmpCurrentIndex+1] = tmpArray[tmpCurrentIndex]

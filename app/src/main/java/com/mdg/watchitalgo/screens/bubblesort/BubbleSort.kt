@@ -1,6 +1,9 @@
 package com.mdg.watchitalgo.screens.bubblesort
 
-import androidx.annotation.ColorRes
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,16 +16,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -88,23 +89,26 @@ fun Bars(
     ) {
         itemsIndexed(items = getArray().asList()){index: Int, value: Int ->
             val currentIndex = getCurrentIndex()
-            val color = if(!getSorted()) {
-                when (index) {
-                    currentIndex -> {
-                        Color.Yellow
-                    }
+            val color: Color by animateColorAsState(
+                targetValue = if(!getSorted()) {
+                    when (index) {
+                        currentIndex -> {
+                            Color.Magenta
+                        }
+                        currentIndex + 1 -> {
+                            Color.Magenta
+                        }
 
-                    currentIndex + 1 -> {
-                        Color.Yellow
+                        else -> {
+                            Color.DarkGray
+                        }
                     }
-
-                    else -> {
-                        Color.DarkGray
-                    }
-                }
-            }else{
-                Color.Green
-            }
+                }else{
+                    Color.Green
+                },
+                animationSpec = tween(400, easing = LinearEasing),
+                label = "Bubble sort bars color animation"
+            )
             Box(
                 modifier = Modifier
                     .fillMaxHeight(.2f * value)
