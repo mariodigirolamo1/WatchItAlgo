@@ -10,6 +10,6 @@ In such animation screen you'll be able to go through the algorithm step-by-step
 - Bubble sort
 
 # Demo
-Capture at 17-November-2023<br>
+Captured at 17-November-2023<br>
 
 [bubble_sort.webm](https://github.com/mariodigirolamo1/WatchItAlgo/assets/69394590/3d28e313-adf6-42c3-97df-a1221e7d2858)
