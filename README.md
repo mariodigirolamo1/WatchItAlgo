@@ -12,4 +12,13 @@ In such animation screen you'll be able to go through the algorithm step-by-step
 # Demo
 Captured at 17-November-2023<br>
 
-[bubble_sort.webm](https://github.com/mariodigirolamo1/WatchItAlgo/assets/69394590/3d28e313-adf6-42c3-97df-a1221e7d2858)
+https://github.com/mariodigirolamo1/WatchItAlgo/assets/69394590/7d4cdb18-3357-4bb8-b5a0-ce76607fdff2
+
+## Demo Description
+You can move into the algorithm step-by-step at your own click pace or you can let it `Autoplay`.
+
+You have various degress of autoplay speeds and you can update it on the fly if you're already autoplaying without interrupting the execution or set it before starting the autoplay.
+
+You can interrupt the autoplay by clicking the pause button or by directly clicking on `Step` or `Reset`, these will also interrupt the autoplay while completing the requested action.
+
+The `Reset` button will allows you to restart the algorithm flow from a clean slate.
