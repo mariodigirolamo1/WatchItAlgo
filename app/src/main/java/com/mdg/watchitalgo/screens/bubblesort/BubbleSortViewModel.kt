@@ -31,8 +31,11 @@ class BubbleSortViewModel: ViewModel() {
     private var animateSwap = false
     private var swapped = true
 
+    // TODO: all this autoplay logic does not belong here
+    //  will be held in new package/module for shared timer logic
     private val autoplayMutex = Mutex()
-    private var isAutoPlaying = false
+    private var _isAutoPlaying = MutableStateFlow(false)
+    val isAutoPlaying: StateFlow<Boolean> = _isAutoPlaying
     private var autoplayTimer: Timer? = null
 
     fun updateAutoplaySpeed(newSpeed: Float){
@@ -49,7 +52,7 @@ class BubbleSortViewModel: ViewModel() {
         viewModelScope.launch(Dispatchers.Default) {
             autoplayMutex.withLock {
                 autoplayTimer?.cancel()
-                if(isAutoPlaying){
+                if(_isAutoPlaying.value){
                     val period = (1000L / autoplaySpeed.value).toLong()
                     autoplayTimer = timer(
                         name = "autoplay timer",
@@ -58,7 +61,7 @@ class BubbleSortViewModel: ViewModel() {
                         period = period
                     ){ timerTask() }
                 }else{
-                    isAutoPlaying = false
+                    _isAutoPlaying.emit(false)
                 }
             }
         }
@@ -83,11 +86,11 @@ class BubbleSortViewModel: ViewModel() {
         withContext(Dispatchers.Default){
             autoplayMutex.withLock {
                 val period = (1000L / autoplaySpeed.value).toLong()
-                if(isAutoPlaying){
-                    isAutoPlaying = false
+                if(_isAutoPlaying.value){
+                    _isAutoPlaying.emit(false)
                     autoplayTimer?.cancel()
                 }else{
-                    isAutoPlaying = true
+                    _isAutoPlaying.emit(true)
                     autoplayTimer = timer(
                         name = "autoplay timer",
                         initialDelay = 0,
@@ -157,7 +160,7 @@ class BubbleSortViewModel: ViewModel() {
     private suspend fun stopAutoplay(){
         autoplayMutex.withLock {
             autoplayTimer?.cancel()
-            isAutoPlaying = false
+            _isAutoPlaying.emit(false)
         }
     }
 

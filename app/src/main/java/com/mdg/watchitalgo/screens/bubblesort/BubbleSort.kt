@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -40,7 +43,9 @@ import com.mdg.watchitalgo.common.ui.theme.WatchItAlgoTheme
 import java.text.DecimalFormat
 
 private val speedRange = 0.1f .. 2f
-private val twoDecimalsFormat = DecimalFormat("#.##")
+private const val SPEED_STEPS = 20
+
+private val twoDecimalsFormat = DecimalFormat("#.#")
 private const val PERCENT_70 = .7f
 
 @Composable
@@ -51,6 +56,7 @@ fun BubbleSort(
     val currentIndex = bubbleSortViewModel.currentIndex.collectAsState()
     val sorted = bubbleSortViewModel.sorted.collectAsState()
     val autoplaySpeed = bubbleSortViewModel.autoplaySpeed.collectAsState()
+    val isAutoPlaying = bubbleSortViewModel.isAutoPlaying.collectAsState()
 
     Surface(
         modifier = Modifier
@@ -68,6 +74,7 @@ fun BubbleSort(
             ){ currentIndex.value }
             Spacer(modifier = Modifier.size(dimensionResource(id = R.dimen.large_spacer)))
             AlgorithmControls(
+                getIsAutoPlaying = { isAutoPlaying.value },
                 toggleAutoplay = { bubbleSortViewModel.toggleAutoPlay() },
                 resetAlgorithmState = { bubbleSortViewModel.resetAlgorithmState() },
                 getAutoplaySpeed = { autoplaySpeed.value },
@@ -129,6 +136,7 @@ private fun AlgorithmControls(
     toggleAutoplay: () -> Unit,
     resetAlgorithmState: () -> Unit,
     getAutoplaySpeed: () -> Float,
+    getIsAutoPlaying: () -> Boolean,
     updateAutoplaySpeed: (newSpeed: Float) -> Unit,
     restartAutoplay: () -> Unit,
     bubbleSortStep: () -> Unit
@@ -137,6 +145,7 @@ private fun AlgorithmControls(
         modifier = Modifier.fillMaxWidth()
     ) {
         ActionButtons(
+            getIsAutoPlaying = getIsAutoPlaying,
             resetAlgorithmState = resetAlgorithmState,
             bubbleSortStep = bubbleSortStep,
             toggleAutoplay = toggleAutoplay
@@ -152,10 +161,16 @@ private fun AlgorithmControls(
 
 @Composable
 fun ActionButtons(
+    getIsAutoPlaying: () -> Boolean,
     resetAlgorithmState: () -> Unit,
     bubbleSortStep: () -> Unit,
     toggleAutoplay: () -> Unit
 ) {
+    val painter = if(getIsAutoPlaying()){
+        painterResource(id = android.R.drawable.ic_media_pause)
+    }else{
+        painterResource(id = android.R.drawable.ic_media_play)
+    }
     Row(
         horizontalArrangement = Arrangement
             .spacedBy(
@@ -171,6 +186,8 @@ fun ActionButtons(
             Text(text = stringResource(R.string.next_button_text))
         }
         Button(onClick = toggleAutoplay) {
+            Icon(painter = painter, contentDescription = stringResource(R.string.autoplay_icon_default_content_description))
+            Spacer(modifier = Modifier.size(dimensionResource(id = R.dimen.light_padding)))
             Text(text = stringResource(R.string.autoplay_button_text))
         }
     }
@@ -197,6 +214,7 @@ fun AutoplaySettings(
             onValueChange = updateAutoplaySpeed,
             onValueChangeFinished = restartAutoplay,
             valueRange = speedRange,
+            steps = SPEED_STEPS,
             modifier = Modifier.fillMaxWidth(PERCENT_70)
         )
     }
@@ -205,10 +223,13 @@ fun AutoplaySettings(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth()
     ){
-        Text(text = stringResource(
-            R.string.speed_value,
-            twoDecimalsFormat.format(getAutoplaySpeed())
-        ))
+        Text(
+            text = stringResource(
+                R.string.speed_value,
+                twoDecimalsFormat.format(getAutoplaySpeed()
+                )
+            )
+        )
     }
 }
 

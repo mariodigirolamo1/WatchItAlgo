@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">WatchItAlgo</string>
 
-    <string name="next_button_text">Next</string>
+    <string name="next_button_text">Step</string>
     <string name="reset_button_text">Reset</string>
     <string name="autoplay_button_text">Autoplay</string>
 
     <string name="autoplay_speed_label">Autoplay speed</string>
     <string name="speed_value">%1$sx</string>
+    <string name="autoplay_icon_default_content_description">Autoplay icon</string>
 </resources>
