@@ -39,6 +39,7 @@ import com.mdg.watchitalgo.R
 import com.mdg.watchitalgo.common.model.Algorithm
 import com.mdg.watchitalgo.common.ui.theme.Typography
 import com.mdg.watchitalgo.common.ui.theme.WatchItAlgoTheme
+import java.text.DecimalFormat
 
 @Composable
 fun BubbleSort(
@@ -166,8 +167,16 @@ private fun AlgorithmControls(
                 value = getAutoplaySpeed(),
                 onValueChange = updateAutoplaySpeed,
                 onValueChangeFinished = restartAutoplay,
-                valueRange = 0.1f .. 2f
+                valueRange = 0.1f .. 2f,
+                modifier = Modifier.fillMaxWidth(.7f)
             )
+        }
+        Spacer(modifier = Modifier.size(size = 10.dp))
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ){
+            Text(text = "${DecimalFormat("#.##").format(getAutoplaySpeed())}x")
         }
     }
 }
