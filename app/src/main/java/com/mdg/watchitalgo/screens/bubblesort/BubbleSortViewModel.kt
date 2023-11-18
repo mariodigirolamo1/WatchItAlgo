@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class BubbleSortViewModel: ViewModel() {
-    private var _array = MutableStateFlow(intArrayOf(5,3,4,1,2))
+    private var _array = MutableStateFlow(unorderedStartingArray)
     val array = _array
 
     private var _currentIndex = MutableStateFlow(0)
@@ -19,6 +19,18 @@ class BubbleSortViewModel: ViewModel() {
 
     private var animateSwap = false
     private var swapped = true
+
+    fun resetAlgorithmState(){
+        viewModelScope.launch {
+            _array.emit(unorderedStartingArray)
+            _currentIndex.emit(0)
+            _sorted.emit(false)
+            withContext(Dispatchers.Default){
+                animateSwap = false
+                swapped = true
+            }
+        }
+    }
 
     fun bubbleSortStep(){
         viewModelScope.launch(Dispatchers.Default) {
@@ -78,5 +90,9 @@ class BubbleSortViewModel: ViewModel() {
             _currentIndex.emit(_currentIndex.value+1)
         }
         animateSwap = false
+    }
+
+    private companion object{
+        val unorderedStartingArray = intArrayOf(5,3,4,1,2)
     }
 }

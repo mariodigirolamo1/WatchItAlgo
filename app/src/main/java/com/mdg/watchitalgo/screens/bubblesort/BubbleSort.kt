@@ -1,7 +1,6 @@
 package com.mdg.watchitalgo.screens.bubblesort
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -9,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,9 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.mdg.watchitalgo.R
 import com.mdg.watchitalgo.common.model.Algorithm
 import com.mdg.watchitalgo.common.ui.theme.Typography
 import com.mdg.watchitalgo.common.ui.theme.WatchItAlgoTheme
@@ -57,15 +59,15 @@ fun BubbleSort(
                 getSorted = { sorted.value }
             ){ currentIndex.value }
             Spacer(modifier = Modifier.size(80.dp))
-            Button(onClick = { bubbleSortViewModel.bubbleSortStep() }){
-                Text(text = "Next")
-            }
+            AlgorithmControls(
+                resetAlgorithmState = { bubbleSortViewModel.resetAlgorithmState() }
+            ) { bubbleSortViewModel.bubbleSortStep() }
         }
     }
 }
 
 @Composable
-fun BubbleSortLabel() {
+private fun BubbleSortLabel() {
     Text(
         text = Algorithm.BubbleSort.name,
         style = Typography.titleLarge,
@@ -75,7 +77,7 @@ fun BubbleSortLabel() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Bars(
+private fun Bars(
     getArray: () -> IntArray,
     getSorted: () -> Boolean,
     getCurrentIndex: () -> Int
@@ -104,6 +106,32 @@ fun Bars(
                     .background(color)
                     .animateItemPlacement()
             ) {}
+        }
+    }
+}
+
+@Composable
+private fun AlgorithmControls(
+    resetAlgorithmState: () -> Unit,
+    bubbleSortStep: () -> Unit
+){
+    Row(
+        horizontalArrangement = Arrangement
+            .spacedBy(
+                space = 8.dp,
+                alignment = Alignment.CenterHorizontally
+            ),
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Button(onClick = resetAlgorithmState) {
+            Text(text = stringResource(R.string.reset_button_text))
+        }
+        Button(onClick = bubbleSortStep) {
+            Text(text = stringResource(R.string.next_button_text))
+        }
+        Button(onClick = {}) {
+            Text(text = stringResource(R.string.autoplay_button_text))
         }
     }
 }
