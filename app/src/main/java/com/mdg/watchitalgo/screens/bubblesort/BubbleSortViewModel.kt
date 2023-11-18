@@ -36,11 +36,7 @@ class BubbleSortViewModel: ViewModel() {
                     tmpCurrentIndex < tmpArray.size - 1
                 ){
                     if(tmpArray[tmpCurrentIndex] > tmpArray[tmpCurrentIndex+1]){
-                        val tmp = tmpArray[tmpCurrentIndex+1]
-                        tmpArray[tmpCurrentIndex+1] = tmpArray[tmpCurrentIndex]
-                        tmpArray[tmpCurrentIndex] = tmp
-                        swapped = true
-                        animateSwap = true
+                        doSwap(tmpArray = tmpArray, tmpCurrentIndex = tmpCurrentIndex)
                     }else{
                         withContext(Dispatchers.Main.immediate){
                             _currentIndex.emit(_currentIndex.value+1)
@@ -61,11 +57,26 @@ class BubbleSortViewModel: ViewModel() {
                     _array.emit(tmpArray)
                 }
             }else{
-                withContext(Dispatchers.Main.immediate){
-                    _currentIndex.emit(_currentIndex.value+1)
-                }
-                animateSwap = false
+                triggerColorAnimation()
             }
         }
+    }
+
+    private fun doSwap(
+        tmpArray: IntArray,
+        tmpCurrentIndex: Int
+    ){
+        val tmp = tmpArray[tmpCurrentIndex+1]
+        tmpArray[tmpCurrentIndex+1] = tmpArray[tmpCurrentIndex]
+        tmpArray[tmpCurrentIndex] = tmp
+        swapped = true
+        animateSwap = true
+    }
+
+    private suspend fun triggerColorAnimation(){
+        withContext(Dispatchers.Main.immediate){
+            _currentIndex.emit(_currentIndex.value+1)
+        }
+        animateSwap = false
     }
 }
