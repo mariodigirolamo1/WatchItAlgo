@@ -1,10 +1,8 @@
 package com.mdg.watchitalgo.screens.bubblesort
 
-import android.widget.Space
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,16 +28,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mdg.watchitalgo.R
 import com.mdg.watchitalgo.common.model.Algorithm
 import com.mdg.watchitalgo.common.ui.theme.Typography
 import com.mdg.watchitalgo.common.ui.theme.WatchItAlgoTheme
 import java.text.DecimalFormat
+
+private val speedRange = 0.1f .. 2f
+private val twoDecimalsFormat = DecimalFormat("#.##")
+private const val PERCENT_70 = .7f
 
 @Composable
 fun BubbleSort(
@@ -53,18 +55,18 @@ fun BubbleSort(
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .padding(all = 8.dp)
+            .padding(all = dimensionResource(id = R.dimen.light_padding))
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
             BubbleSortLabel()
-            Spacer(modifier = Modifier.size(80.dp))
+            Spacer(modifier = Modifier.size(dimensionResource(id = R.dimen.large_spacer)))
             Bars(
                 getArray = { array.value },
                 getSorted = { sorted.value }
             ){ currentIndex.value }
-            Spacer(modifier = Modifier.size(80.dp))
+            Spacer(modifier = Modifier.size(dimensionResource(id = R.dimen.large_spacer)))
             AlgorithmControls(
                 toggleAutoplay = { bubbleSortViewModel.toggleAutoPlay() },
                 resetAlgorithmState = { bubbleSortViewModel.resetAlgorithmState() },
@@ -83,7 +85,7 @@ private fun BubbleSortLabel() {
     Text(
         text = Algorithm.BubbleSort.name,
         style = Typography.titleLarge,
-        modifier = Modifier.padding(start = 8.dp)
+        modifier = Modifier.padding(start = dimensionResource(id = R.dimen.light_padding))
     )
 }
 
@@ -134,50 +136,79 @@ private fun AlgorithmControls(
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            horizontalArrangement = Arrangement
-                .spacedBy(
-                    space = 8.dp,
-                    alignment = Alignment.CenterHorizontally
-                ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Button(onClick = resetAlgorithmState) {
-                Text(text = stringResource(R.string.reset_button_text))
-            }
-            Button(onClick = bubbleSortStep) {
-                Text(text = stringResource(R.string.next_button_text))
-            }
-            Button(onClick = toggleAutoplay) {
-                Text(text = stringResource(R.string.autoplay_button_text))
-            }
+        ActionButtons(
+            resetAlgorithmState = resetAlgorithmState,
+            bubbleSortStep = bubbleSortStep,
+            toggleAutoplay = toggleAutoplay
+        )
+        Spacer(modifier = Modifier.size(size = dimensionResource(id = R.dimen.medium_spacer)))
+        AutoplaySettings(
+            getAutoplaySpeed = getAutoplaySpeed,
+            updateAutoplaySpeed = updateAutoplaySpeed,
+            restartAutoplay = restartAutoplay
+        )
+    }
+}
+
+@Composable
+fun ActionButtons(
+    resetAlgorithmState: () -> Unit,
+    bubbleSortStep: () -> Unit,
+    toggleAutoplay: () -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement
+            .spacedBy(
+                space = dimensionResource(id = R.dimen.light_padding),
+                alignment = Alignment.CenterHorizontally
+            ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(onClick = resetAlgorithmState) {
+            Text(text = stringResource(R.string.reset_button_text))
         }
-        Spacer(modifier = Modifier.size(size = 30.dp))
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ){
-            Text(text = "Autoplay speed")
+        Button(onClick = bubbleSortStep) {
+            Text(text = stringResource(R.string.next_button_text))
         }
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ){
-            Slider(
-                value = getAutoplaySpeed(),
-                onValueChange = updateAutoplaySpeed,
-                onValueChangeFinished = restartAutoplay,
-                valueRange = 0.1f .. 2f,
-                modifier = Modifier.fillMaxWidth(.7f)
-            )
+        Button(onClick = toggleAutoplay) {
+            Text(text = stringResource(R.string.autoplay_button_text))
         }
-        Spacer(modifier = Modifier.size(size = 10.dp))
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ){
-            Text(text = "${DecimalFormat("#.##").format(getAutoplaySpeed())}x")
-        }
+    }
+}
+
+@Composable
+fun AutoplaySettings(
+    getAutoplaySpeed: () -> Float,
+    updateAutoplaySpeed: (newSpeed: Float) -> Unit,
+    restartAutoplay: () -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+    ){
+        Text(text = stringResource(R.string.autoplay_speed_label))
+    }
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+    ){
+        Slider(
+            value = getAutoplaySpeed(),
+            onValueChange = updateAutoplaySpeed,
+            onValueChangeFinished = restartAutoplay,
+            valueRange = speedRange,
+            modifier = Modifier.fillMaxWidth(PERCENT_70)
+        )
+    }
+    Spacer(modifier = Modifier.size(size = dimensionResource(id = R.dimen.small_spacer)))
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+    ){
+        Text(text = stringResource(
+            R.string.speed_value,
+            twoDecimalsFormat.format(getAutoplaySpeed())
+        ))
     }
 }
 

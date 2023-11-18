@@ -48,9 +48,19 @@ class BubbleSortViewModel: ViewModel() {
     fun restartAutoplayWithNewSpeed(){
         viewModelScope.launch(Dispatchers.Default) {
             autoplayMutex.withLock {
-                stopAutoplay()
+                autoplayTimer?.cancel()
+                if(isAutoPlaying){
+                    val period = (1000L / autoplaySpeed.value).toLong()
+                    autoplayTimer = timer(
+                        name = "autoplay timer",
+                        initialDelay = 0,
+                        daemon = false,
+                        period = period
+                    ){ timerTask() }
+                }else{
+                    isAutoPlaying = false
+                }
             }
-            toggleAutoPlay()
         }
     }
 
@@ -65,9 +75,7 @@ class BubbleSortViewModel: ViewModel() {
                 animateSwap = false
                 swapped = true
             }
-            autoplayMutex.withLock {
-                stopAutoplay()
-            }
+            stopAutoplay()
         }
     }
 
@@ -75,7 +83,6 @@ class BubbleSortViewModel: ViewModel() {
         withContext(Dispatchers.Default){
             autoplayMutex.withLock {
                 val period = (1000L / autoplaySpeed.value).toLong()
-                println()
                 if(isAutoPlaying){
                     isAutoPlaying = false
                     autoplayTimer?.cancel()
@@ -86,25 +93,25 @@ class BubbleSortViewModel: ViewModel() {
                         initialDelay = 0,
                         daemon = false,
                         period = period
-                    ){
-                        if(!_sorted.value){
-                            bubbleSortStep(manualStart = false)
-                        }else{
-                            stopAutoplay()
-                        }
-                    }
+                    ){ timerTask() }
                 }
+            }
+        }
+    }
+
+    private fun timerTask(){
+        viewModelScope.launch(Dispatchers.Default) {
+            if(!_sorted.value){
+                bubbleSortStep(manualStart = false)
+            }else{
+                stopAutoplay()
             }
         }
     }
 
     fun bubbleSortStep(manualStart: Boolean) = runBlocking{
         viewModelScope.launch(Dispatchers.Default) {
-            if(manualStart){
-                autoplayMutex.withLock {
-                    stopAutoplay()
-                }
-            }
+            if(manualStart){ stopAutoplay() }
             bubbleSortStepMutex.withLock {
                 val tmpArray = IntArray(_array.value.size){0}
                 _array.value.forEachIndexed {index, value ->
@@ -147,9 +154,11 @@ class BubbleSortViewModel: ViewModel() {
         }
     }
 
-    private fun stopAutoplay(){
-        autoplayTimer?.cancel()
-        isAutoPlaying = false
+    private suspend fun stopAutoplay(){
+        autoplayMutex.withLock {
+            autoplayTimer?.cancel()
+            isAutoPlaying = false
+        }
     }
 
     private fun doSwap(
