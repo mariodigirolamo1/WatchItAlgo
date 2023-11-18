@@ -88,24 +88,12 @@ fun Bars(
             .fillMaxHeight(.5f)
     ) {
         itemsIndexed(items = getArray().asList()){index: Int, value: Int ->
-            val currentIndex = getCurrentIndex()
             val color: Color by animateColorAsState(
-                targetValue = if(!getSorted()) {
-                    when (index) {
-                        currentIndex -> {
-                            Color.Magenta
-                        }
-                        currentIndex + 1 -> {
-                            Color.Magenta
-                        }
-
-                        else -> {
-                            Color.DarkGray
-                        }
-                    }
-                }else{
-                    Color.Green
-                },
+                targetValue = getBarColor(
+                    itemIndex = index,
+                    getSorted = getSorted,
+                    getCurrentIndex = getCurrentIndex
+                ),
                 animationSpec = tween(400, easing = LinearEasing),
                 label = "Bubble sort bars color animation"
             )
@@ -117,6 +105,30 @@ fun Bars(
                     .animateItemPlacement()
             ) {}
         }
+    }
+}
+
+private fun getBarColor(
+    itemIndex: Int,
+    getSorted: () -> Boolean,
+    getCurrentIndex: () -> Int
+): Color {
+    val currentIndex = getCurrentIndex()
+    return if(!getSorted()) {
+        when (itemIndex) {
+            currentIndex -> {
+                Color.Magenta
+            }
+            currentIndex + 1 -> {
+                Color.Magenta
+            }
+
+            else -> {
+                Color.DarkGray
+            }
+        }
+    }else{
+        Color.Green
     }
 }
 
