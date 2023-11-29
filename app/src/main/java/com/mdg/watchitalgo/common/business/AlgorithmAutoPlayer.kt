@@ -8,7 +8,6 @@ import kotlinx.coroutines.withContext
 import java.util.Timer
 import kotlin.concurrent.timer
 
-// TODO: fix bug, since now if i change speed autoplay stops 
 class AlgorithmAutoPlayer {
     private val autoplayMutex = Mutex()
     private var autoplayTimer: Timer? = null
@@ -70,8 +69,6 @@ class AlgorithmAutoPlayer {
                     daemon = false,
                     period = period
                 ){ action() }
-            }else{
-                isAutoPlaying = false
             }
         }
     }
@@ -92,6 +89,7 @@ class AlgorithmAutoPlayer {
                     period = period
                 ){ action() }
             }
+            isAutoPlaying = !isAutoPlaying
         }
     }
 }
