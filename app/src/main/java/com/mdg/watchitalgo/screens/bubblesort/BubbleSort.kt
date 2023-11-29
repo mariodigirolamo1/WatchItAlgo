@@ -52,9 +52,7 @@ private const val PERCENT_70 = .7f
 fun BubbleSort(
     bubbleSortViewModel: BubbleSortViewModel = hiltViewModel()
 ) {
-    val array = bubbleSortViewModel.array.collectAsState()
-    val currentIndex = bubbleSortViewModel.currentIndex.collectAsState()
-    val sorted = bubbleSortViewModel.sorted.collectAsState()
+    val bubbleSortState = bubbleSortViewModel.bubbleSortState.collectAsState()
     val autoplaySpeed = bubbleSortViewModel.autoplaySpeed.collectAsState()
     val isAutoPlaying = bubbleSortViewModel.isAutoPlaying.collectAsState()
 
@@ -69,9 +67,10 @@ fun BubbleSort(
             BubbleSortLabel()
             Spacer(modifier = Modifier.size(dimensionResource(id = R.dimen.large_spacer)))
             Bars(
-                getArray = { array.value },
-                getSorted = { sorted.value }
-            ){ currentIndex.value }
+                getArray = { bubbleSortState.value.array },
+                getSorted = { bubbleSortState.value.sorted },
+                getCurrentIndex = { bubbleSortState.value.currentIndex }
+            )
             Spacer(modifier = Modifier.size(dimensionResource(id = R.dimen.large_spacer)))
             AlgorithmControls(
                 getIsAutoPlaying = { isAutoPlaying.value },
@@ -82,7 +81,8 @@ fun BubbleSort(
                     bubbleSortViewModel.updateAutoplaySpeed(newSpeed = newSpeed)
                 },
                 restartAutoplay = { bubbleSortViewModel.restartAutoplayWithNewSpeed() },
-            ) { bubbleSortViewModel.bubbleSortStep(manualStart = true) }
+                bubbleSortStep = { bubbleSortViewModel.bubbleSortStep(manualStart = true) }
+            )
         }
     }
 }

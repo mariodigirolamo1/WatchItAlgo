@@ -2,39 +2,27 @@ package com.mdg.watchitalgo.screens.bubblesort
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mdg.watchitalgo.algorithm.bubblesort.BubbleSortSolver
+import com.mdg.watchitalgo.algorithm.bubblesort.BubbleSortState
 import com.mdg.watchitalgo.common.business.AlgorithmAutoPlayer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-// TODO: isolate bubble sort steps
-//  state of the algorithm stays here to have a coherent display in the ui but
-//  logic for the algorithm needs to be placed elsewhere, this viewModel does too
-//  many things
 class BubbleSortViewModel: ViewModel() {
-    private var _array = MutableStateFlow(unorderedStartingArray)
-    val array: StateFlow<IntArray> = _array
-
-    private var _currentIndex = MutableStateFlow(0)
-    val currentIndex: StateFlow<Int> = _currentIndex
-
+    // TODO: this needs to be some autoplay state
     private var _autoplaySpeed = MutableStateFlow(1f)
     val autoplaySpeed: StateFlow<Float> = _autoplaySpeed
 
     private var _isAutoPlaying = MutableStateFlow(false)
     val isAutoPlaying: StateFlow<Boolean> = _isAutoPlaying
 
-    private var _sorted = MutableStateFlow(false)
-    val sorted = _sorted
+    private val _bubbleSortState = MutableStateFlow(startingBubbleSortState)
+    val bubbleSortState: StateFlow<BubbleSortState> = _bubbleSortState
 
-    private val bubbleSortStepMutex = Mutex()
-    private var animateSwap = false
-    private var swapped = true
-
+    private val bubbleSortSolver = BubbleSortSolver()
     private val algorithmAutoPlayer = AlgorithmAutoPlayer()
 
     init{
@@ -61,18 +49,11 @@ class BubbleSortViewModel: ViewModel() {
     }
 
     fun resetAlgorithmState(){
-        viewModelScope.launch(Dispatchers.Default) {
-            bubbleSortStepMutex.withLock {
-                withContext(Dispatchers.Main.immediate){
-                    _array.emit(unorderedStartingArray)
-                    _currentIndex.emit(0)
-                    _sorted.emit(false)
-                }
-                animateSwap = false
-                swapped = true
+        viewModelScope.launch {
+            _bubbleSortState.emit(startingBubbleSortState)
+            withContext(Dispatchers.Default){
+                stopAlgorithmAutoPlayer()
             }
-            algorithmAutoPlayer.stop()
-            _isAutoPlaying.emit(algorithmAutoPlayer.isAutoPlaying)
         }
     }
 
@@ -83,13 +64,13 @@ class BubbleSortViewModel: ViewModel() {
         }
     }
 
+    // TODO: name too generic, change this
     private fun timerTask(){
         viewModelScope.launch(Dispatchers.Default) {
-            if(!_sorted.value){
+            if(!_bubbleSortState.value.sorted){
                 bubbleSortStep(manualStart = false)
             }else{
-                algorithmAutoPlayer.stop()
-                _isAutoPlaying.emit(algorithmAutoPlayer.isAutoPlaying)
+                stopAlgorithmAutoPlayer()
             }
         }
     }
@@ -97,70 +78,44 @@ class BubbleSortViewModel: ViewModel() {
     fun bubbleSortStep(manualStart: Boolean) {
         viewModelScope.launch(Dispatchers.Default) {
             if(manualStart){
-                algorithmAutoPlayer.stop()
-                _isAutoPlaying.emit(algorithmAutoPlayer.isAutoPlaying)
+                stopAlgorithmAutoPlayer()
             }
-            bubbleSortStepMutex.withLock {
-                val tmpArray = IntArray(_array.value.size){0}
-                _array.value.forEachIndexed {index, value ->
-                    tmpArray[index] = value
-                }
-                val tmpCurrentIndex = currentIndex.value
 
-                if(!animateSwap){
-                    if(tmpCurrentIndex == 0 && swapped){
-                        swapped = false
-                    }
-                    if(
-                        tmpCurrentIndex < tmpArray.size - 1
-                    ){
-                        if(tmpArray[tmpCurrentIndex] > tmpArray[tmpCurrentIndex+1]){
-                            doSwap(tmpArray = tmpArray, tmpCurrentIndex = tmpCurrentIndex)
-                        }else{
-                            withContext(Dispatchers.Main.immediate){
-                                _currentIndex.emit(_currentIndex.value+1)
-                            }
-                        }
-                    }else{
-                        if(!swapped){
-                            withContext(Dispatchers.Main.immediate){
-                                _sorted.emit(true)
-                            }
-                        }else{
-                            withContext(Dispatchers.Main.immediate){
-                                _currentIndex.emit(0)
-                            }
-                        }
-                    }
-                    withContext(Dispatchers.Main.immediate){
-                        _array.emit(tmpArray)
-                    }
-                }else{
-                    triggerColorAnimation()
-                }
+            // TODO: this could probably be avoided/simplified
+            val tmpArray = IntArray(_bubbleSortState.value.array.size){0}
+            _bubbleSortState.value.array.forEachIndexed {index, value ->
+                tmpArray[index] = value
+            }
+            val tmpCurrentIndex = _bubbleSortState.value.currentIndex
+
+            val newBubbleSortState = bubbleSortSolver.bubbleSortStep(
+                array = tmpArray,
+                currentIndex = tmpCurrentIndex,
+                animateSwap = _bubbleSortState.value.animateSwap,
+                swapped = _bubbleSortState.value.swapped,
+                sorted = _bubbleSortState.value.sorted
+            )
+
+            viewModelScope.launch {
+                _bubbleSortState.emit(newBubbleSortState)
             }
         }
     }
 
-    private fun doSwap(
-        tmpArray: IntArray,
-        tmpCurrentIndex: Int
-    ){
-        val tmp = tmpArray[tmpCurrentIndex+1]
-        tmpArray[tmpCurrentIndex+1] = tmpArray[tmpCurrentIndex]
-        tmpArray[tmpCurrentIndex] = tmp
-        swapped = true
-        animateSwap = true
-    }
-
-    private suspend fun triggerColorAnimation(){
-        withContext(Dispatchers.Main.immediate){
-            _currentIndex.emit(_currentIndex.value+1)
-        }
-        animateSwap = false
+    private suspend fun stopAlgorithmAutoPlayer(){
+        algorithmAutoPlayer.stop()
+        _isAutoPlaying.emit(algorithmAutoPlayer.isAutoPlaying)
     }
 
     private companion object{
         val unorderedStartingArray = intArrayOf(5,3,4,1,2)
+
+        val startingBubbleSortState = BubbleSortState(
+            array = unorderedStartingArray,
+            currentIndex = 0,
+            animateSwap = false,
+            swapped = false,
+            sorted = false
+        )
     }
 }
