@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 class BubbleSortViewModel: ViewModel() {
     // TODO: this needs to be some autoplay state
@@ -49,8 +51,17 @@ class BubbleSortViewModel: ViewModel() {
     }
 
     fun resetAlgorithmState(){
+        val newArray = IntArray(5){ Random.nextInt(1 .. 5) }
+        // TODO: remove those magic values
+        val newState = BubbleSortState(
+            array = newArray,
+            currentIndex = 0,
+            animateSwap = false,
+            swapped = false,
+            sorted = false
+        )
         viewModelScope.launch {
-            _bubbleSortState.emit(startingBubbleSortState)
+            _bubbleSortState.emit(newState)
             withContext(Dispatchers.Default){
                 stopAlgorithmAutoPlayer()
             }
@@ -108,6 +119,7 @@ class BubbleSortViewModel: ViewModel() {
     }
 
     private companion object{
+        // TODO: always use a random one
         val unorderedStartingArray = intArrayOf(5,3,4,1,2)
 
         val startingBubbleSortState = BubbleSortState(

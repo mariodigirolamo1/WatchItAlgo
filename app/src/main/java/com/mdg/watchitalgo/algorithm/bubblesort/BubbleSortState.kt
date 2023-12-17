@@ -1,7 +1,7 @@
 package com.mdg.watchitalgo.algorithm.bubblesort
 
 data class BubbleSortState (
-    val array: IntArray,
+    var array: IntArray,
     val currentIndex: Int,
     val animateSwap: Boolean,
     val swapped: Boolean,

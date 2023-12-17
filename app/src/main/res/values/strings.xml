@@ -2,7 +2,7 @@
     <string name="app_name">WatchItAlgo</string>
 
     <string name="next_button_text">Step</string>
-    <string name="reset_button_text">Reset</string>
+    <string name="reset_button_text">Shuffle</string>
     <string name="autoplay_button_text">Autoplay</string>
 
     <string name="autoplay_speed_label">Autoplay speed</string>
